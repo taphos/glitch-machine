@@ -21,11 +21,8 @@
 <script type="importmap">
     {
         "imports": {
-            "three": "./node_modules/three/build/three.module.js",
-            "three/addons/": "./node_modules/three/examples/jsm/",
-            "tone": "./node_modules/tone/build/esm/index.js",
-            "standardized-audio-context": "./node_modules/standardized-audio-context/build/es2019/module.js",
-            "automation-events": "./node_modules/automation-events/build/es2019/module.js"
+            "three": "https://unpkg.com/three@0.168.0/build/three.module.min.js",
+            "three/addons/": "https://unpkg.com/three@0.168.0/examples/jsm/"
         }
     }
 </script>
@@ -82,7 +79,7 @@
         pitchShift.connect(pitchedNoiseGain);
 
         noise.start();
-        let source;
+        let source, gain;
 
         new Tone.Buffer("idling-truck.wav", async buffer => {
             source = new Tone.BufferSource({url: buffer, playbackRate: 0.1, loop: true}).toDestination();
@@ -97,7 +94,7 @@
             filter.start();
             source.connect(filter);
 
-            window.gain = new Tone.Gain(0.5).toDestination();
+            gain = new Tone.Gain(0.5).toDestination();
             source.connect(gain);
             filter.connect(gain)
             reverb.connect(gain)
@@ -115,8 +112,8 @@
             autoFilter.baseFrequency = v * 1000;
             pitchedNoiseGain.gain.value = v * 2 - 1;
             filteredNoiseGain.gain.value = v * 2 - 1;
-            source.playbackRate.value = v * 0.2 + 0.05;
-            gain.gain.value = v * 10 - 1;
+            if (source) source.playbackRate.value = v * 0.2 + 0.05;
+            if (gain) gain.gain.value = v * 10 - 1;
         }
         updateNoise(1);
     }
@@ -186,11 +183,11 @@
 
     setInterval(() => {
         glitchPass.goWild = Math.random() < 0.5;
-        console.log(glitchPass.goWild);
         texturePass.opacity = glitchPass.goWild ? 0.2 : 0.001;
     }, 3000);
     setInterval(() => {
-        updateNoise(glitchPass.goWild ? Math.random() * 0.5 + 0.5 : Math.random() * 0.2);
+        if (updateNoise)
+            updateNoise(glitchPass.goWild ? Math.random() * 0.5 + 0.5 : Math.random() * 0.2);
     }, 1000);
 
     function onWindowResize() {
