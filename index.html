@@ -15,7 +15,8 @@
         This experience may potentially trigger seizures for people with <strong>photosensitive epilepsy</strong>
         or trigger <strong>miscarriage</strong> for people with pregnancy.
     </p>
-    <button id="startButton">Okay</button>
+    <p id="cameraUseText" style="display:none">You must allow camera use to continue</p>
+    <button id="startButton" style="display:none">Okay</button>
 </div>
 
 <script type="importmap">
@@ -44,6 +45,7 @@
     import {generatePerlinNoise} from "@vicimpa/perlin-noise"
 
     const button = document.querySelector( '#startButton' );
+    button.style.display = "none";
     button.addEventListener( 'click', function () {
         const overlay = document.getElementById( 'overlay' );
         overlay.remove();
@@ -162,7 +164,10 @@
     composer = new EffectComposer( renderer );
     composer.addPass(new RenderPixelatedPass( 20, scene, camera ));
 
+    document.getElementById("cameraUseText").style.display = "block";
     const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    document.getElementById("cameraUseText").style.display = "none";
+    button.style.display = "block";
     const video = document.createElement('video');
     video.srcObject = videoStream;
     video.play();
