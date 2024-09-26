@@ -1,0 +1,13 @@
+{
+  "name": "kirke-homework",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "module",
+  "dependencies": {
+    "three": "0.168.0",
+    "tone": "^15.0.4",
+    "@vicimpa/perlin-noise": "^0.0.7"
+  }
+}

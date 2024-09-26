@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>F̶̴̶̳̫̱̝̫͇̘̲̞̺̲̗͕̟̞͒́ͭͯ̌ͣ̀̂͊ͮ́̇̌ͬ̀̾̄͢͟ͅͅ_̙̮̏Ư̧̧̡̰̮̫͖̝͕̙͕̞̘̈́̋ͯͣ͗̔͗̓́ͤͮ͑ͦ̕͜͡͞C̴̯̠̫̙̝̘͒͊ͦ͠ͅK̄ͭ H̸̖̦̣͙͚̖̖ͥ̓͛̍̈́ͣ̑͌͘͝_̶̧̲͚͎̤͈͇͕͇̀́ͫ̊͊ͭ̓ͫͯ̑͜͟͝͝Ǔ̱̰̽͛͐ͮͪͨ̇M̵̴͖̯͇̅̿͗̈́ͩ̀̾̓̽ͧͪͤ͛͑͝ͅA̴̡̧͚͙̯̋̓̎͌̑͛̃͐͒̌͢N͓̤̣̯̿͛_̶̥̝̮̻̻̦̖ͥͮ̓̀̓̏ͪ̓͋̀̀ͣͦ́͜͠S̸̸̡̝̬̳͓̭̣̝̻̼̯̭̆ͧͧͬ̀̂͌ͨ̂ͪ͊̓͐̓ͬ́̊͊ͥ̕͘͜</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <link rel="icon" href="icon.png" type="image/png">
+</head>
+<body>
+
+<div id="overlay">
+    <h2>WARNING</h2>
+    <p style="text-align: center; max-width:450px; margin-bottom:40px;">
+        This experience may potentially trigger seizures for people with <strong>photosensitive epilepsy</strong>
+        or trigger <strong>miscarriage</strong> for people with pregnancy.
+    </p>
+    <button id="startButton">Okay</button>
+</div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "./node_modules/three/build/three.module.js",
+            "three/addons/": "./node_modules/three/examples/jsm/",
+            "tone": "./node_modules/tone/build/esm/index.js",
+            "standardized-audio-context": "./node_modules/standardized-audio-context/build/es2019/module.js",
+            "automation-events": "./node_modules/automation-events/build/es2019/module.js"
+        }
+    }
+</script>
+<script src="http://unpkg.com/tone"></script>
+
+<script type="module">
+
+    import * as THREE from 'three';
+
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import {TexturePass} from "three/addons/postprocessing/TexturePass.js";
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import {RenderPixelatedPass} from "three/addons/postprocessing/RenderPixelatedPass.js";
+    import {VideoEffectPass} from "./src/VideoEffectPass.js"
+    import {generatePerlinNoise} from "./node_modules/@vicimpa/perlin-noise/dist/index.js"
+
+    const button = document.querySelector( '#startButton' );
+    button.addEventListener( 'click', function () {
+        const overlay = document.getElementById( 'overlay' );
+        overlay.remove();
+        renderer.setAnimationLoop( animate );
+        startSound();
+    } );
+
+    // import * as Tone from "tone";
+
+    let updateNoise;
+
+    const startSound = () => {
+        const noise = new Tone.Noise("brown");
+        const pitchedNoiseGain = new Tone.Gain(-1).toDestination();
+        const filteredNoiseGain = new Tone.Gain(-1).toDestination();
+
+        // window.onMidi.push(() => {
+        //     pitchShift.pitch = midi[17] * 200 - 100;
+        //     autoFilter.baseFrequency = midi[18] * 1000;
+        //     pitchedNoiseGain.gain.value = midi[1] * 2 - 1;
+        //     filteredNoiseGain.gain.value = midi[2] * 2 - 1;
+        // });
+
+        //make an autofilter to shape the noise
+        const autoFilter = new Tone.AutoFilter({
+            frequency: 1,
+            baseFrequency: 100
+        }).toDestination().start();
+        noise.connect(autoFilter);
+        autoFilter.connect(filteredNoiseGain);
+
+        const pitchShift = new Tone.PitchShift().toDestination();
+        noise.connect(pitchShift);
+        pitchShift.connect(pitchedNoiseGain);
+
+        noise.start();
+        let source;
+
+        new Tone.Buffer("idling-truck.wav", async buffer => {
+            source = new Tone.BufferSource({url: buffer, playbackRate: 0.1, loop: true}).toDestination();
+
+            const reverb = await new Tone.Reverb(5).set({
+                wet: 0.5
+            }).toDestination().generate();
+            source.connect(reverb);
+            reverb.toDestination();
+
+            const filter = new Tone.AutoFilter(1 / 30).toDestination();
+            filter.start();
+            source.connect(filter);
+
+            window.gain = new Tone.Gain(0.5).toDestination();
+            source.connect(gain);
+            filter.connect(gain)
+            reverb.connect(gain)
+
+            // window.onMidi.push(() => {
+            //     source.playbackRate.value = midi[16] * 0.2 + 0.05;
+            //     gain.gain.value = midi[0] * 10 - 1;
+            // });
+
+            source.start();
+        });
+
+        updateNoise = (v) => {
+            pitchShift.pitch = v * 200 - 100;
+            autoFilter.baseFrequency = v * 1000;
+            pitchedNoiseGain.gain.value = v * 2 - 1;
+            filteredNoiseGain.gain.value = v * 2 - 1;
+            source.playbackRate.value = v * 0.2 + 0.05;
+            gain.gain.value = v * 10 - 1;
+        }
+        updateNoise(1);
+    }
+
+    let camera, scene, renderer, composer;
+    let object, light;
+
+    let glitchPass;
+
+    const perlinNoise = generatePerlinNoise(1000, 1, {octaveCount: 5});
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
+
+    //
+
+    camera = new THREE.PerspectiveCamera( 3, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    camera.position.z = 20;
+
+    scene = new THREE.Scene();
+    scene.fog = new THREE.Fog( 0x000000, 1, 1000 );
+    scene.background = new THREE.Color("#90FF0A");
+
+
+    object = new THREE.Object3D();
+    scene.add( object );
+
+    new GLTFLoader().load('bonnie_penis.glb', (m) => {
+        m.scene.position.y = -2.5;
+        m.scene.position.z = -1;
+        m.scene.scale.set(4, 4, 4);
+        object.add(m.scene);
+    })
+
+    scene.add( new THREE.AmbientLight( 0xcccccc ) );
+
+    light = new THREE.DirectionalLight( "#FF1493", 3 );
+    light.position.set( 1, 1, 1 );
+    scene.add( light );
+
+    // postprocessing
+
+    composer = new EffectComposer( renderer );
+    composer.addPass(new RenderPixelatedPass( 20, scene, camera ));
+
+    const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    const video = document.createElement('video');
+    video.srcObject = videoStream;
+    video.play();
+    const videoTexture = new THREE.VideoTexture(video);
+    let videoPass = new VideoEffectPass(videoTexture, 0.7);
+    composer.addPass(videoPass);
+
+    glitchPass = new GlitchPass();
+    glitchPass.goWild = true;
+    composer.addPass( glitchPass );
+
+    let texturePass = new TexturePass(new THREE.TextureLoader().load("icon.png"), 0.1);
+    composer.addPass(texturePass);
+
+    const outputPass = new OutputPass();
+    composer.addPass( outputPass );
+
+    window.addEventListener( 'resize', onWindowResize );
+
+    setInterval(() => {
+        glitchPass.goWild = Math.random() < 0.5;
+        console.log(glitchPass.goWild);
+        texturePass.opacity = glitchPass.goWild ? 0.2 : 0.001;
+    }, 3000);
+    setInterval(() => {
+        updateNoise(glitchPass.goWild ? Math.random() * 0.5 + 0.5 : Math.random() * 0.2);
+    }, 1000);
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        composer.setSize( window.innerWidth, window.innerHeight );
+    }
+
+    let frame = 0;
+    function animate() {
+        videoPass.opacity = perlinNoise[frame++ % perlinNoise.length] * 1.5;
+        object.rotation.y += 0.01;
+        composer.render();
+    }
+
+</script>
+</body>
+</html>
