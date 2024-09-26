@@ -22,7 +22,8 @@
     {
         "imports": {
             "three": "https://unpkg.com/three@0.168.0/build/three.module.min.js",
-            "three/addons/": "https://unpkg.com/three@0.168.0/examples/jsm/"
+            "three/addons/": "https://unpkg.com/three@0.168.0/examples/jsm/",
+            "@vicimpa/perlin-noise": "https://unpkg.com/@vicimpa/perlin-noise@0.0.7/dist/index.js"
         }
     }
 </script>
@@ -40,7 +41,7 @@
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import {RenderPixelatedPass} from "three/addons/postprocessing/RenderPixelatedPass.js";
     import {VideoEffectPass} from "./src/VideoEffectPass.js"
-    import {generatePerlinNoise} from "./node_modules/@vicimpa/perlin-noise/dist/index.js"
+    import {generatePerlinNoise} from "@vicimpa/perlin-noise"
 
     const button = document.querySelector( '#startButton' );
     button.addEventListener( 'click', function () {
