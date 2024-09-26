@@ -169,6 +169,7 @@
     document.getElementById("cameraUseText").style.display = "none";
     button.style.display = "block";
     const video = document.createElement('video');
+    video.playsInline = true;
     video.srcObject = videoStream;
     video.play();
     const videoTexture = new THREE.VideoTexture(video);
