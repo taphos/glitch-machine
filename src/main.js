@@ -1,12 +1,10 @@
 import {startSound, updateSound} from "./sound.js";
-
-import * as THREE from 'three';
-
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass.js';
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import {WebGLRenderer, PerspectiveCamera, Scene, Object3D, Fog, AmbientLight, Color, DirectionalLight, TextureLoader, VideoTexture} from 'three';
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import {GlitchPass} from 'three/examples/jsm/postprocessing/GlitchPass.js';
+import {OutputPass} from 'three/examples/jsm/postprocessing/OutputPass.js';
 import {TexturePass} from "three/examples/jsm/postprocessing/TexturePass.js";
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RenderPixelatedPass} from "three/examples/jsm/postprocessing/RenderPixelatedPass.js";
 import {VideoEffectPass} from "./VideoEffectPass.js"
 import {generatePerlinNoise} from "@vicimpa/perlin-noise"
@@ -18,7 +16,7 @@ let glitchPass;
 
 const perlinNoise = generatePerlinNoise(1000, 1, {octaveCount: 5});
 
-renderer = new THREE.WebGLRenderer();
+renderer = new WebGLRenderer();
 renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize( window.innerWidth, window.innerHeight );
 
@@ -28,27 +26,27 @@ export const start = () => {
     return renderer.domElement;
 };
 
-camera = new THREE.PerspectiveCamera( 3, window.innerWidth / window.innerHeight, 0.1, 1000 );
+camera = new PerspectiveCamera( 3, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.z = 20;
 
-scene = new THREE.Scene();
-scene.fog = new THREE.Fog( 0x000000, 1, 1000 );
-scene.background = new THREE.Color("#90FF0A");
+scene = new Scene();
+scene.fog = new Fog(0x000000, 1, 1000);
+scene.background = new Color("#90FF0A");
 
 
-object = new THREE.Object3D();
+object = new Object3D();
 scene.add( object );
 
-new GLTFLoader().load('bonnie_penis.glb', (m) => {
+new GLTFLoader().load('assets/bonnie_penis.glb', (m) => {
     m.scene.position.y = -2.5;
     m.scene.position.z = -1;
     m.scene.scale.set(4, 4, 4);
     object.add(m.scene);
 })
 
-scene.add( new THREE.AmbientLight( 0xcccccc ) );
+scene.add( new AmbientLight( 0xcccccc ) );
 
-light = new THREE.DirectionalLight( "#FF1493", 3 );
+light = new DirectionalLight( "#FF1493", 3 );
 light.position.set( 1, 1, 1 );
 scene.add( light );
 
@@ -60,7 +58,7 @@ const video = document.createElement('video');
 video.playsInline = true;
 video.srcObject = videoStream;
 video.play();
-const videoTexture = new THREE.VideoTexture(video);
+const videoTexture = new VideoTexture(video);
 let videoPass = new VideoEffectPass(videoTexture, 0.7);
 composer.addPass(videoPass);
 
@@ -68,7 +66,7 @@ glitchPass = new GlitchPass();
 glitchPass.goWild = true;
 composer.addPass( glitchPass );
 
-let texturePass = new TexturePass(new THREE.TextureLoader().load("icon.png"), 0.1);
+let texturePass = new TexturePass(new TextureLoader().load("assets/icon.png"), 0.1);
 composer.addPass(texturePass);
 
 const outputPass = new OutputPass();

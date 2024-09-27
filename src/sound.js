@@ -1,6 +1,7 @@
+let Tone; // will be overwritten by import
 import "tone";
 
-export let updateSound = () => {};
+export let updateSound = (v) => {};
 
 export const startSound = () => {
     const noise = new Tone.Noise("brown");
@@ -29,7 +30,7 @@ export const startSound = () => {
     noise.start();
     let source, gain;
 
-    new Tone.Buffer("idling-truck.wav", async buffer => {
+    new Tone.Buffer("assets/idling-truck.wav", async buffer => {
         source = new Tone.BufferSource({url: buffer, playbackRate: 0.1, loop: true}).toDestination();
 
         const reverb = await new Tone.Reverb(5).set({
