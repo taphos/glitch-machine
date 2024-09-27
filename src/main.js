@@ -43,7 +43,7 @@ function createDickRenderPass() {
     camera.position.z = 20;
 
     const scene = new Scene();
-    scene.fog = new Fog(0x000000, 1, 1000);
+    scene.fog = new Fog("#000000", 1, 1000);
     scene.background = new Color("#90FF0A");
 
     const object = new Object3D();
@@ -54,7 +54,7 @@ function createDickRenderPass() {
         m.scene.scale.set(4, 4, 4);
         object.add(m.scene);
     })
-    scene.add( new AmbientLight("#xcccccc"));
+    scene.add(new AmbientLight("#CCCCCC"));
     const light = new DirectionalLight("#FF1493", 3);
     light.position.set(1, 1, 1);
     scene.add(light);
