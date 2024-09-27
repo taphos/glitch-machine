@@ -1,5 +1,6 @@
-let Tone; // will be overwritten by import
 import "tone";
+// @ts-ignore
+const Tone = window.Tone;
 
 export let updateSound = (v) => {};
 
