@@ -6,8 +6,8 @@ import {OutputPass} from 'three/examples/jsm/postprocessing/OutputPass.js';
 import {TexturePass} from "three/examples/jsm/postprocessing/TexturePass.js";
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RenderPixelatedPass} from "three/examples/jsm/postprocessing/RenderPixelatedPass.js";
-import {VideoEffectPass} from "./VideoEffectPass.js"
-import {generatePerlinNoise} from "@vicimpa/perlin-noise"
+import {VideoEffectPass} from "./VideoEffectPass.js";
+import {generatePerlinNoise} from "@vicimpa/perlin-noise";
 
 const animationListeners = [];
 const renderer = new WebGLRenderer();
