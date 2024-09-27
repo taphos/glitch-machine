@@ -23,26 +23,26 @@
     {
         "imports": {
             "three": "https://unpkg.com/three@0.168.0/build/three.module.min.js",
-            "three/addons/": "https://unpkg.com/three@0.168.0/examples/jsm/",
-            "@vicimpa/perlin-noise": "https://unpkg.com/@vicimpa/perlin-noise@0.0.7/dist/index.js"
+            "three/examples/jsm/": "https://unpkg.com/three@0.168.0/examples/jsm/",
+            "@vicimpa/perlin-noise": "https://unpkg.com/@vicimpa/perlin-noise@0.0.7/dist/index.js",
+            "tone": "https://unpkg.com/tone@15.0.4/build/Tone.js"
         }
     }
 </script>
-<script src="https://unpkg.com/tone"></script>
 
 <script type="module">
 
     import * as THREE from 'three';
 
-    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-    import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
-    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-    import {TexturePass} from "three/addons/postprocessing/TexturePass.js";
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import {RenderPixelatedPass} from "three/addons/postprocessing/RenderPixelatedPass.js";
+    import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+    import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass.js';
+    import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+    import {TexturePass} from "three/examples/jsm/postprocessing/TexturePass.js";
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+    import {RenderPixelatedPass} from "three/examples/jsm/postprocessing/RenderPixelatedPass.js";
     import {VideoEffectPass} from "./src/VideoEffectPass.js"
     import {generatePerlinNoise} from "@vicimpa/perlin-noise"
+    import "tone";
 
     const button = document.querySelector( '#startButton' );
     button.style.display = "none";
@@ -52,8 +52,6 @@
         renderer.setAnimationLoop( animate );
         startSound();
     } );
-
-    // import * as Tone from "tone";
 
     let updateNoise;
 

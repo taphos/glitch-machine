@@ -1,9 +1,8 @@
 import {
-    NormalBlending, NoBlending,
     ShaderMaterial,
     UniformsUtils, SrcAlphaFactor, AddEquation, OneMinusSrcAlphaFactor, CustomBlending
 } from 'three';
-import { Pass, FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
+import { Pass, FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';
 
 const shader = {
 
