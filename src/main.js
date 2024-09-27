@@ -9,26 +9,33 @@ import {RenderPixelatedPass} from "three/examples/jsm/postprocessing/RenderPixel
 import {VideoEffectPass} from "./VideoEffectPass.js";
 import {generatePerlinNoise} from "@vicimpa/perlin-noise";
 
+// Initialize renderer and composer
+// Composer contains passes (passes are like photoshop layers)
 const animationListeners = [];
 const renderer = new WebGLRenderer();
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 const composer = new EffectComposer(renderer);
 
+// Create and add passes to composer
 createDickRenderPass();
 await createCameraVideoPass();
 const glitchPass = createGlitchPass();
 const smileTexturePass = createSmileTexturePass();
 
+// Once in 3 seconds make glitch pass "go wild" with probability 50%
+// Also show smile texture synchronously
 setInterval(() => {
     glitchPass.goWild = Math.random() < 0.5;
     smileTexturePass.opacity = glitchPass.goWild ? 0.2 : 0.001;
 }, 3000);
 
+// Once a second update sound generator values, in sync with glitch pass
 setInterval(() => {
     updateSound(glitchPass.goWild ? Math.random() * 0.5 + 0.5 : Math.random() * 0.2);
 }, 1000);
 
+// Called when disclaimer Okey button is pressed
 export function start() {
     renderer.setAnimationLoop((time) => {
         animationListeners.forEach(l => l(time));
@@ -60,14 +67,15 @@ function createDickRenderPass() {
     scene.add(light);
     composer.addPass(new RenderPixelatedPass(8 * devicePixelRatio, scene, camera));
 
+    // On every frame, rotate dick in sync with time value
     animationListeners.push((time) => {
         object.rotation.y = time * 0.001;
     });
+    // Update virtual camera aspect on browser window resize
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
     });
-    return camera;
 }
 
 async function createCameraVideoPass() {
@@ -80,11 +88,12 @@ async function createCameraVideoPass() {
     let pass = new VideoEffectPass(videoTexture, 0.7);
     composer.addPass(pass);
 
+    // Generate array of perlin noise values
     const perlinNoise = generatePerlinNoise(1000, 1, {octaveCount: 5});
+    // Update pass opacity using perlin noise values, in sync with time
     animationListeners.push((time) => {
         pass.opacity = perlinNoise[Math.trunc(time * 0.1) % perlinNoise.length] * 1.5;
     })
-    return pass;
 }
 
 function createGlitchPass() {
@@ -102,6 +111,7 @@ function createSmileTexturePass() {
     return pass;
 }
 
+// Update renderer and composer size if browser window is resized
 window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
