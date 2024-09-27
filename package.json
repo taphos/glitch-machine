@@ -10,8 +10,8 @@
   "type": "module",
   "dependencies": {
     "three": "0.168.0",
-    "tone": "^15.0.4",
-    "@vicimpa/perlin-noise": "^0.0.7",
-    "http-server": "^14.1.1"
+    "tone": "15.0.4",
+    "@vicimpa/perlin-noise": "0.0.7",
+    "http-server": "14.1.1"
   }
 }
