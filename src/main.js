@@ -50,7 +50,6 @@ export function start() {
 };
 
 function createDickRenderPass() {
-    
 
 				const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
 				camera.position.z = 400;
@@ -77,16 +76,19 @@ function createDickRenderPass() {
                 let  vnh , vth;
 				loader.load( 'assets/bonnie_penis.glb', function ( gltf ) {
 
-                    console.log(gltf);
-					const mesh = gltf.scene.children[ 0 ];
+                    let mesh;
+                    gltf.scene.traverse(o => {
+                        if (!mesh && o.geometry) mesh = o;
+                    });
 
-					// mesh.geometry.computeTangents(); // generates bad data due to degenerate UVs
+					mesh.geometry.computeTangents(); // generates bad data due to degenerate UVs
 
 					const group = new THREE.Group();
-					group.scale.multiplyScalar( 50 );
+					group.scale.multiplyScalar( 500 );
+                    group.position.y = -400;
 					scene.add( group );
 
-					// To make sure that the matrixWorld is up to date for the boxhelpers
+					// // To make sure that the matrixWorld is up to date for the boxhelpers
 					group.updateMatrixWorld( true );
 
 					group.add( mesh );
