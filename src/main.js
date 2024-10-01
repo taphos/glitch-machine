@@ -8,6 +8,10 @@ import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {RenderPixelatedPass} from "three/examples/jsm/postprocessing/RenderPixelatedPass.js";
 import {VideoEffectPass} from "./VideoEffectPass.js";
 import {generatePerlinNoise} from "@vicimpa/perlin-noise";
+import * as THREE from "three";
+import { VertexTangentsHelper } from "three/examples/jsm/helpers/VertexTangentsHelper.js";
+import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 
 // Initialize renderer and composer
 // Composer contains passes (passes are like photoshop layers)
@@ -19,20 +23,20 @@ const composer = new EffectComposer(renderer);
 
 // Create and add passes to composer
 createDickRenderPass();
-await createCameraVideoPass();
-const glitchPass = createGlitchPass();
-const smileTexturePass = createSmileTexturePass();
+// await createCameraVideoPass();
+// const glitchPass = createGlitchPass();
+// const smileTexturePass = createSmileTexturePass();
 
 // Once in 3 seconds make glitch pass "go wild" with probability 50%
 // Also show smile texture synchronously
 setInterval(() => {
-    glitchPass.goWild = Math.random() < 0.5;
-    smileTexturePass.opacity = glitchPass.goWild ? 0.2 : 0.001;
+ //   glitchPass.goWild = Math.random() < 0.5;
+ //   smileTexturePass.opacity = glitchPass.goWild ? 0.2 : 0.001;
 }, 3000);
 
 // Once a second update sound generator values, in sync with glitch pass
 setInterval(() => {
-    updateSound(glitchPass.goWild ? Math.random() * 0.5 + 0.5 : Math.random() * 0.2);
+ //   updateSound(glitchPass.goWild ? Math.random() * 0.5 + 0.5 : Math.random() * 0.2);
 }, 1000);
 
 // Called when disclaimer Okey button is pressed
@@ -41,35 +45,105 @@ export function start() {
         animationListeners.forEach(l => l(time));
         composer.render();
     });
-    startSound();
+  //  startSound();
     return renderer.domElement;
 };
 
 function createDickRenderPass() {
-    const camera = new PerspectiveCamera(3, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 20;
+    
 
-    const scene = new Scene();
-    scene.fog = new Fog("#000000", 1, 1000);
-    scene.background = new Color("#90FF0A");
+				const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.z = 400;
 
-    const object = new Object3D();
-    scene.add(object);
-    new GLTFLoader().load('assets/bonnie_penis.glb', (m) => {
-        m.scene.position.y = -2.5;
-        m.scene.position.z = -1;
-        m.scene.scale.set(4, 4, 4);
-        object.add(m.scene);
-    })
-    scene.add(new AmbientLight("#CCCCCC"));
-    const light = new DirectionalLight("#FF1493", 3);
-    light.position.set(1, 1, 1);
-    scene.add(light);
-    composer.addPass(new RenderPixelatedPass(8 * devicePixelRatio, scene, camera));
+				const scene = new THREE.Scene();
+
+				const light = new THREE.PointLight();
+				light.position.set( 200, 100, 150 );
+				scene.add( light );
+
+				scene.add( new THREE.PointLightHelper( light, 15 ) );
+
+				const gridHelper = new THREE.GridHelper( 400, 40, 0x0000ff, 0x808080 );
+				gridHelper.position.y = - 150;
+				gridHelper.position.x = - 150;
+				scene.add( gridHelper );
+
+				const polarGridHelper = new THREE.PolarGridHelper( 200, 16, 8, 64, 0x0000ff, 0x808080 );
+				polarGridHelper.position.y = - 150;
+				polarGridHelper.position.x = 200;
+				scene.add( polarGridHelper );
+
+				const loader = new GLTFLoader();
+                let  vnh , vth;
+				loader.load( 'assets/bonnie_penis.glb', function ( gltf ) {
+
+                    console.log(gltf);
+					const mesh = gltf.scene.children[ 0 ];
+
+					// mesh.geometry.computeTangents(); // generates bad data due to degenerate UVs
+
+					const group = new THREE.Group();
+					group.scale.multiplyScalar( 50 );
+					scene.add( group );
+
+					// To make sure that the matrixWorld is up to date for the boxhelpers
+					group.updateMatrixWorld( true );
+
+					group.add( mesh );
+
+					vnh = new VertexNormalsHelper( mesh, 5 );
+					scene.add( vnh );
+
+					vth = new VertexTangentsHelper( mesh, 5 );
+					scene.add( vth );
+
+					scene.add( new THREE.BoxHelper( mesh ) );
+
+					const wireframe = new THREE.WireframeGeometry( mesh.geometry );
+					let line = new THREE.LineSegments( wireframe );
+					line.material.depthTest = false;
+					line.material.opacity = 0.25;
+					line.material.transparent = true;
+					line.position.x = 4;
+					group.add( line );
+					scene.add( new THREE.BoxHelper( line ) );
+
+					const edges = new THREE.EdgesGeometry( mesh.geometry );
+					line = new THREE.LineSegments( edges );
+					line.material.depthTest = false;
+					line.material.opacity = 0.25;
+					line.material.transparent = true;
+					line.position.x = - 4;
+					group.add( line );
+					scene.add( new THREE.BoxHelper( line ) );
+
+					scene.add( new THREE.BoxHelper( group ) );
+					scene.add( new THREE.BoxHelper( scene ) );
+
+
+				} );
+
+				//
+
+    composer.addPass(new RenderPass(scene, camera));
 
     // On every frame, rotate dick in sync with time value
     animationListeners.push((time) => {
-        object.rotation.y = time * 0.001;
+
+            time = - performance.now() * 0.0003;
+
+            camera.position.x = 400 * Math.cos( time );
+            camera.position.z = 400 * Math.sin( time );
+            camera.lookAt( scene.position );
+
+            light.position.x = Math.sin( time * 1.7 ) * 300;
+            light.position.y = Math.cos( time * 1.5 ) * 400;
+            light.position.z = Math.cos( time * 1.3 ) * 300;
+
+            if ( vnh ) vnh.update();
+            if ( vth ) vth.update();
+
+    
     });
     // Update virtual camera aspect on browser window resize
     window.addEventListener('resize', () => {
